@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Form, File, UploadFile, HTTPException
-
+from typing import List
 app = FastAPI()
 
 # Forms
@@ -18,21 +18,23 @@ app = FastAPI()
 # File Upload
 
 @app.post("/file-upload/")
-async def file_upload(File : UploadFile = File(...)):
-    content = await File.read()
+async def file_upload(files : List[UploadFile] = File(...)):
+    
+    result = []
+    for file in files:
+        content = await file.read()
+        try:
+            text_preview = content[:100]
+        except:
+            text_preview = "Cannot preview the file"
 
-    try:
-        text_preview = content[:100]
-    except e:
-        text_preview = "Cannot preview the file"
-
-    return {
-        "filename": File.filename,
-        "filetype": File.content_type,
-        "len of the content in letters": len(content),
-        "preview": text_preview
-    }
-
+        result.append({
+            "filename": file.filename,
+            "filetype": file.content_type,
+            "len of the content in letters": len(content),
+            "preview": text_preview
+        })
+    return result
     
 
 

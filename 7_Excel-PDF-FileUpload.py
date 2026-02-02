@@ -18,7 +18,18 @@ async def file_upload(file : UploadFile = File(...)):
         return {"Type" : "Excel", "Preview" : df.head(4).to_dict()}
 
     elif name.endswith(".pdf"):
-        reader = 
+        reader = PdfReader(io.BytesIO(content))
+        texts = []
+        for page in reader.pages:
+            text = page.extract_text()
+            if text is None:
+                text = ""
+            texts.append(text)
+
+        text = "".join(texts)
+        return {"Type" : "PDF", "Preview" : text[:100]}
+    return {"Error" : "Unsupported file type"}
+
 
 
 

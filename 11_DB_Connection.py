@@ -19,6 +19,7 @@ class user_details(BaseModel):
     username: str
     password: str
 
+# Insert operation
 @app.post("/user/register/")
 def register_user(user: user_details):
     try:
@@ -28,7 +29,8 @@ def register_user(user: user_details):
     except:
         raise HTTPException(status_code=400, detail="Unable to register user")
 
-@app.get("/raed/")
+# Read operation
+@app.get("/read/")
 def read_data():
     try:
         cursor.execute("SELECT * FROM users")
@@ -45,3 +47,28 @@ def readone(id: int):
         return {"id":row[0], "username":row[1], "password":row[2]}
     except:
         raise HTTPException(status_code=404, detail="User not found")
+    
+# Update Operation
+
+@app.put("/update/{id}")
+def update_user(id: int, user: user_details):
+    try:
+        cursor.execute("UPDATE users SET username=?, password=? WHERE id=?", (user.username, user.password, id))
+        conn.commit()
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="User not found")
+        return {"message": "User updated successfully"}
+    except:
+        raise HTTPException(status_code=404, detail="Unable to update")
+    
+# Delete Operation
+@app.delete("/delete/{id}")
+def delete_user(id: int):
+    try:
+        cursor.execute("DELETE FROM users WHERE id=?", (id,))
+        conn.commit()
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="User not found")
+        return {"message": "User deleted successfully"}
+    except:
+        raise HTTPException(status_code=404, detail="Unable to delete")
